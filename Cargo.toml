@@ -1,0 +1,13 @@
+[package]
+name = "vtx-sdk"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+wit-bindgen = "0.25.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+
+[lib]
+crate-type = ["rlib"] # SDK 是个库，不是二进制
