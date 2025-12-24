@@ -1,8 +1,7 @@
-/// WIT 绑定生成模块
+/// WIT 接口绑定模块（私有）
 ///
-/// 职责：
-/// 根据 `wit/vtx.wit` 定义生成 Rust 绑定代码。
-/// 这是一个私有模块，外部通过 `prelude` 或其他模块访问功能。
+/// 通过 `wit_bindgen` 宏将 `wit/vtx.wit` 文件中定义的接口自动生成 Rust 类型绑定。
+/// 此模块为内部绑定实现，不应被外部直接访问，应通过 `prelude` 或显式导出的类型使用。
 mod bindings {
     wit_bindgen::generate!({
         world: "plugin",
@@ -11,19 +10,34 @@ mod bindings {
     });
 }
 
+// =====================
 // 模块定义
+// =====================
+
+/// 数据库工具模块（迁移、结构、连接封装）
 pub mod db;
 
-// 子模块：HTTP 请求/响应结构与构造器
+/// HTTP 请求 / 响应结构与构造器
 pub mod http;
 
-// 子模块：用户身份鉴权与上下文工具
+/// 用户身份认证与上下文结构工具
 pub mod auth;
 
-// SDK 统一入口，聚合导出（给插件调用者使用）
+/// 错误类型定义与统一错误处理
+pub mod error;
+
+/// 通用预导入模块（导出常用类型/宏/辅助函数）
 pub mod prelude;
 
-// 显式导出核心类型，供外部引用
+// =====================
+// 类型导出（供外部模块使用）
+// =====================
+
+/// 导出插件实现接口定义（`export!(...)`）
 pub use bindings::export;
+
+/// 用户上下文结构，常用于授权接口
 pub use bindings::vtx::api::auth_types::UserContext;
+
+/// 插件清单类型，用于插件元数据管理
 pub use bindings::vtx::api::types::Manifest;

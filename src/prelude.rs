@@ -13,6 +13,9 @@ pub use crate::http::{Request, Response, ResponseBuilder};
 /// 鉴权与用户上下文工具
 pub use crate::auth::{AuthRequest, UserBuilder};
 
+/// 导出错误类型，方便插件使用 ? 操作符
+pub use crate::error::{VtxError, VtxResult};
+
 /// 核心元数据与宏
 pub use crate::{export, Manifest, UserContext};
 

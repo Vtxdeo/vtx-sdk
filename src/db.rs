@@ -1,15 +1,16 @@
 use crate::bindings::vtx::api::sql::{self, DbValue};
+use crate::error::{VtxError, VtxResult};
 use serde::de::DeserializeOwned;
 
-/// 数据库参数转换特征
+/// Trait：用于将 Rust 类型转换为 WIT 定义的 `DbValue`
 ///
-/// 职责：
-/// 将 Rust 原生类型转换为 WIT 定义的 `DbValue` 变体，以便跨边界传递。
+/// 适用于数据库跨边界调用参数传递。
 pub trait ToDbValue {
     fn to_db_value(&self) -> DbValue;
 }
 
-// 实现常用类型的参数转换逻辑
+// --- 基本类型到 DbValue 的映射实现 ---
+
 impl ToDbValue for String {
     fn to_db_value(&self) -> DbValue {
         DbValue::Text(self.clone())
@@ -40,36 +41,44 @@ impl ToDbValue for f64 {
     }
 }
 
-/// 执行非查询语句 (INSERT/UPDATE/DELETE)
+/// 执行非查询类 SQL（INSERT / UPDATE / DELETE）
 ///
-/// 参数：
-/// - `sql`: 原始 SQL 语句，支持 `?` 占位符。
-/// - `params`: 参数列表，需实现 `ToDbValue`。
+/// # Parameters
+/// - `sql`: SQL 原始字符串，支持 `?` 占位符
+/// - `params`: 参数数组，元素需实现 `ToDbValue`
 ///
-/// 返回值：
-/// - 成功：受影响的行数 (rows_affected)。
-/// - 失败：错误描述字符串。
-pub fn execute(sql: &str, params: &[&dyn ToDbValue]) -> Result<u64, String> {
+/// # Returns
+/// - 成功：返回影响行数
+/// - 失败：映射为 `VtxError::DatabaseError`
+///
+/// ⚠️ 注意：Restricted 安全策略下禁止调用该接口
+pub fn execute(sql: &str, params: &[&dyn ToDbValue]) -> VtxResult<u64> {
     let wit_params: Vec<DbValue> = params.iter().map(|p| p.to_db_value()).collect();
-    sql::execute(sql, &wit_params)
+
+    sql::execute(sql, &wit_params).map_err(VtxError::DatabaseError)
 }
 
-/// 执行查询语句 (SELECT)
+/// 执行查询类 SQL（SELECT）并反序列化为目标类型列表
 ///
-/// 行为：
-/// 1. 调用宿主接口执行 SQL。
-/// 2. 宿主将结果集序列化为 JSON 字符串返回。
-/// 3. 插件侧反序列化为泛型 `Vec<T>`。
+/// # Parameters
+/// - `sql`: SQL 字符串（支持 ? 占位符）
+/// - `params`: 参数数组（实现 `ToDbValue`）
 ///
-/// 性能边界：
-/// 由于涉及 JSON 序列化/反序列化及内存拷贝，此方法不适合处理
-/// 超过 1MB 的大数据集。建议在 SQL 中使用 `LIMIT` 进行分页。
-pub fn query<T: DeserializeOwned>(sql: &str, params: &[&dyn ToDbValue]) -> Result<Vec<T>, String> {
+/// # Returns
+/// - 成功：反序列化后的结果集合
+/// - 失败：`DatabaseError` 或 `SerializationError`
+///
+/// # Notes
+/// - 宿主接口返回的是 JSON 字符串
+/// - 为保证性能，建议单次返回控制在 1MB 内（可通过 LIMIT 分页）
+/// - 泛型 `T` 必须实现 `DeserializeOwned`（无需生命周期）
+///
+pub fn query<T: DeserializeOwned>(sql: &str, params: &[&dyn ToDbValue]) -> VtxResult<Vec<T>> {
     let wit_params: Vec<DbValue> = params.iter().map(|p| p.to_db_value()).collect();
 
-    // 跨边界调用：获取 JSON 结果
-    let json_str = sql::query_json(sql, &wit_params)?;
+    let json_str = sql::query_json(sql, &wit_params)
+        .map_err(VtxError::DatabaseError)?;
 
-    // 本地反序列化
-    serde_json::from_str(&json_str).map_err(|e| format!("JSON Parse Error: {}", e))
+    serde_json::from_str(&json_str)
+        .map_err(|e| VtxError::SerializationError(e.to_string()))
 }
