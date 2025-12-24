@@ -2,7 +2,7 @@
 ///
 /// 通过 `wit_bindgen` 宏将 `wit/vtx.wit` 文件中定义的接口自动生成 Rust 类型绑定。
 /// 此模块为内部绑定实现，不应被外部直接访问，应通过 `prelude` 或显式导出的类型使用。
-mod bindings {
+pub mod bindings {
     wit_bindgen::generate!({
         world: "plugin",
         path: "wit",
