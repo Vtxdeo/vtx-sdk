@@ -10,8 +10,8 @@ pub use crate::db::{self, ToDbValue};
 /// 包含请求/响应定义及响应构建器
 pub use crate::http::{Request, Response, ResponseBuilder};
 
-/// 鉴权与用户上下文工具
-pub use crate::auth::{AuthRequest, UserBuilder};
+/// 鉴权与用户上下文工具及转换特征
+pub use crate::auth::{AuthRequest, IntoAuthResult, UserBuilder};
 
 /// 导出错误类型，方便插件使用 ? 操作符
 pub use crate::error::{VtxError, VtxResult};

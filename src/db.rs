@@ -76,9 +76,7 @@ pub fn execute(sql: &str, params: &[&dyn ToDbValue]) -> VtxResult<u64> {
 pub fn query<T: DeserializeOwned>(sql: &str, params: &[&dyn ToDbValue]) -> VtxResult<Vec<T>> {
     let wit_params: Vec<DbValue> = params.iter().map(|p| p.to_db_value()).collect();
 
-    let json_str = sql::query_json(sql, &wit_params)
-        .map_err(VtxError::DatabaseError)?;
+    let json_str = sql::query_json(sql, &wit_params).map_err(VtxError::DatabaseError)?;
 
-    serde_json::from_str(&json_str)
-        .map_err(|e| VtxError::SerializationError(e.to_string()))
+    serde_json::from_str(&json_str).map_err(|e| VtxError::SerializationError(e.to_string()))
 }
