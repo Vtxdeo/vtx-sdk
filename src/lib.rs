@@ -7,6 +7,7 @@ pub mod bindings {
         world: "plugin",
         path: "wit",
         pub_export_macro: true,
+        default_bindings_module: "vtx_sdk::bindings",
     });
 }
 
