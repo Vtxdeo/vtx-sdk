@@ -54,3 +54,16 @@ pub use bindings::vtx::api::auth_types::UserContext;
 /// 插件清单类型，用于插件元数据管理
 /// `Manifest` 类型用于表示插件的元数据和描述信息。
 pub use bindings::vtx::api::types::Manifest;
+
+// =====================
+// 元数据导出 (仅在 meta 特性开启时可用)
+// =====================
+
+/// 暴露 SDK 内置的 WIT 接口定义文件内容
+/// CLI 工具可以使用此常量来验证插件是否符合当前版本的契约
+#[cfg(feature = "meta")]
+pub const WIT_DEFINITION: &str = include_str!("../wit/vtx.wit");
+
+/// SDK 版本号
+#[cfg(feature = "meta")]
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");

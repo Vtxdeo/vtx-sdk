@@ -1,6 +1,6 @@
 [package]
 name = "vtx-sdk"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 description = "Official SDK for developing VTX plugins using Rust and WebAssembly."
 license = "Apache-2.0"
@@ -16,6 +16,10 @@ include = [
     "README.md",
     "LICENSE"
 ]
+
+[features]
+default = []
+meta = []
 
 [dependencies]
 wit-bindgen = "0.25.0"
