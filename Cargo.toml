@@ -2,6 +2,20 @@
 name = "vtx-sdk"
 version = "0.1.1"
 edition = "2021"
+description = "Official SDK for developing VTX plugins using Rust and WebAssembly."
+license = "Apache-2.0"
+repository = "https://github.com/vtxdeo/vtx-sdk"
+documentation = "https://docs.rs/vtx-sdk"
+keywords = ["wasm", "plugin", "sdk", "vtx"]
+categories = ["wasm", "api-bindings"]
+
+include = [
+    "src/**/*",
+    "wit/**/*",
+    "Cargo.toml",
+    "README.md",
+    "LICENSE"
+]
 
 [dependencies]
 wit-bindgen = "0.25.0"
@@ -10,4 +24,4 @@ serde_json = "1.0"
 anyhow = "1.0"
 
 [lib]
-crate-type = ["rlib"] # SDK 是个库，不是二进制
+crate-type = ["rlib"]

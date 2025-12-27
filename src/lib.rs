@@ -1,13 +1,22 @@
 /// WIT 接口绑定模块（私有）
 ///
-/// 通过 `wit_bindgen` 宏将 `wit/vtx.wit` 文件中定义的接口自动生成 Rust 类型绑定。
-/// 此模块为内部绑定实现，不应被外部直接访问，应通过 `prelude` 或显式导出的类型使用。
+/// # 说明
+/// 该模块负责生成和管理与 `wit/vtx.wit` 文件中定义的接口绑定。
+/// 通过使用 `wit_bindgen` 宏，自动将 `wit/vtx.wit` 文件中的接口转换为 Rust 类型。
+///
+/// **注意**：该模块依赖根目录下的 `wit/` 文件夹，在发布时需要确保 `Cargo.toml` 的 `include` 字段包含该路径。
+/// 在构建过程中，`wit_bindgen` 宏会根据 `wit/vtx.wit` 文件生成绑定代码。
+///
+/// 该模块仅用于内部实现，不应直接在外部访问。外部应该通过 `prelude` 或显式导出的类型来使用。
 pub mod bindings {
+    // 使用 wit_bindgen 宏生成 WIT 接口的 Rust 类型绑定
     wit_bindgen::generate!({
-        world: "plugin",
+        world: "plugin",  // 定义插件名称
+        // `path` 是相对于 `Cargo.toml` 的路径，指定 WIT 文件所在的位置
+        // 在作为 crate 依赖时，cargo 会解压源码，此路径仍然有效
         path: "wit",
-        pub_export_macro: true,
-        default_bindings_module: "vtx_sdk::bindings",
+        pub_export_macro: true,  // 导出宏，以供外部调用
+        default_bindings_module: "vtx_sdk::bindings",  // 默认绑定模块路径
     });
 }
 
@@ -35,10 +44,13 @@ pub mod prelude;
 // =====================
 
 /// 导出插件实现接口定义（`export!(...)`）
+/// 提供给外部使用插件的接口。
 pub use bindings::export;
 
 /// 用户上下文结构，常用于授权接口
+/// `UserContext` 类型常用于用户身份认证和权限检查的上下文数据。
 pub use bindings::vtx::api::auth_types::UserContext;
 
 /// 插件清单类型，用于插件元数据管理
+/// `Manifest` 类型用于表示插件的元数据和描述信息。
 pub use bindings::vtx::api::types::Manifest;
