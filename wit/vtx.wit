@@ -68,6 +68,7 @@ interface types {
         name: string,
         version: string,
         description: string,
+        entrypoint: string,
     }
 }
 
