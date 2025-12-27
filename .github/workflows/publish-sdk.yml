@@ -25,12 +25,10 @@ jobs:
           ls -F
 
       - name: Verify Package Content
-        working-directory: vtx-sdk
         run: |
           cargo package --list | grep "wit/vtx.wit"
 
       - name: Publish vtx-sdk
-        working-directory: vtx-sdk
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: |
