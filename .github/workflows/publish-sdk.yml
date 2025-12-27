@@ -19,14 +19,19 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Verify Package Content
+      - name: Debug Directory Structure
         run: |
-          # Verify that the wit directory is actually included in the package
-          cargo package --list --manifest-path vtx-sdk/Cargo.toml | grep "wit/vtx.wit"
-        continue-on-error: false
+          echo "Current directory: $(pwd)"
+          ls -F
+
+      - name: Verify Package Content
+        working-directory: vtx-sdk
+        run: |
+          cargo package --list | grep "wit/vtx.wit"
 
       - name: Publish vtx-sdk
+        working-directory: vtx-sdk
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: |
-          cargo publish --manifest-path vtx-sdk/Cargo.toml
+          cargo publish
