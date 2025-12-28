@@ -66,6 +66,7 @@ impl Plugin for MyPlugin {
             version: "0.1.0".to_string(),
             name: "Hello World Plugin".to_string(),
             description: "A simple example plugin".to_string(),
+            entrypoint: "/hello".to_string(),
         })
     }
 
