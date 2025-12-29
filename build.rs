@@ -7,10 +7,13 @@ fn main() {
     let out_dir = env::var("OUT_DIR").expect("OUT_DIR not set");
 
     println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:warning=Using VTX Protocol definition from: {:?}", protocol_wit_path);
+    println!(
+        "cargo:warning=Using VTX Protocol definition from: {:?}",
+        protocol_wit_path
+    );
 
-    let wit_content = fs::read_to_string(&protocol_wit_path)
-        .expect("Failed to read WIT definition file");
+    let wit_content =
+        fs::read_to_string(&protocol_wit_path).expect("Failed to read WIT definition file");
 
     let bindings_code = format!(
         r#####"
