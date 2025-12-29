@@ -1,22 +1,14 @@
 /// WIT 接口绑定模块（私有）
 ///
 /// # 说明
-/// 该模块负责生成和管理与 `wit/vtx.wit` 文件中定义的接口绑定。
-/// 通过使用 `wit_bindgen` 宏，自动将 `wit/vtx.wit` 文件中的接口转换为 Rust 类型。
-///
-/// **注意**：该模块依赖根目录下的 `wit/` 文件夹，在发布时需要确保 `Cargo.toml` 的 `include` 字段包含该路径。
-/// 在构建过程中，`wit_bindgen` 宏会根据 `wit/vtx.wit` 文件生成绑定代码。
-///
-/// 该模块仅用于内部实现，不应直接在外部访问。外部应该通过 `prelude` 或显式导出的类型来使用。
+/// 该模块负责生成和管理与 VTX Protocol 定义的接口绑定。
+/// 它不再依赖本地文件，而是直接使用 `vtx-protocol` 提供的单一事实来源。
 pub mod bindings {
-    // 使用 wit_bindgen 宏生成 WIT 接口的 Rust 类型绑定
     wit_bindgen::generate!({
-        world: "plugin",  // 定义插件名称
-        // `path` 是相对于 `Cargo.toml` 的路径，指定 WIT 文件所在的位置
-        // 在作为 crate 依赖时，cargo 会解压源码，此路径仍然有效
-        path: "wit",
-        pub_export_macro: true,  // 导出宏，以供外部调用
-        default_bindings_module: "vtx_sdk::bindings",  // 默认绑定模块路径
+        world: "plugin",
+        inline: include_str!(concat!(env!("OUT_DIR"), "/vtx.wit")),
+        pub_export_macro: true,
+        default_bindings_module: "vtx_sdk::bindings",
     });
 }
 
@@ -59,10 +51,10 @@ pub use bindings::vtx::api::types::Manifest;
 // 元数据导出 (仅在 meta 特性开启时可用)
 // =====================
 
-/// 暴露 SDK 内置的 WIT 接口定义文件内容
-/// CLI 工具可以使用此常量来验证插件是否符合当前版本的契约
+/// 暴露 SDK 使用的 WIT 接口定义内容
+/// 直接复用 vtx-protocol crate 中的常量，零运行时开销
 #[cfg(feature = "meta")]
-pub const WIT_DEFINITION: &str = include_str!("../wit/vtx.wit");
+pub const WIT_DEFINITION: &str = vtx_protocol::WIT_CONTENT;
 
 /// SDK 版本号
 #[cfg(feature = "meta")]

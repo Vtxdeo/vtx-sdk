@@ -17,6 +17,13 @@
     * `UserBuilder` for easy auth context management.
     * `VtxError` for unified error handling.
 
+## 🏗️ Architecture
+
+Unlike traditional Wasm projects, this SDK **does not** maintain a local copy of the WIT interface definitions. Instead, it relies on the [vtx-protocol](https://github.com/vtxdeo/vtx-protocol) crate as the Single Source of Truth (SSOT).
+
+* **Build Time**: The `build.rs` script dynamically fetches the WIT definition path from the `vtx-protocol` build dependency and injects it into the compilation process.
+* **Runtime/Metadata**: The `WIT_DEFINITION` constant is also sourced directly from the protocol crate, ensuring zero divergence between the SDK and the Protocol.
+
 ## 📦 Installation
 
 Add `vtx-sdk` to your plugin's `Cargo.toml`:

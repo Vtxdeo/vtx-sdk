@@ -19,14 +19,8 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Debug Directory Structure
-        run: |
-          echo "Current directory: $(pwd)"
-          ls -F
-
-      - name: Verify Package Content
-        run: |
-          cargo package --list | grep "wit/vtx.wit"
+      - name: Check Build
+        run: cargo check --verbose
 
       - name: Publish vtx-sdk
         env:
