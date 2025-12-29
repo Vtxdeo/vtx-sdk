@@ -4,12 +4,7 @@
 /// 该模块负责生成和管理与 VTX Protocol 定义的接口绑定。
 /// 它不再依赖本地文件，而是直接使用 `vtx-protocol` 提供的单一事实来源。
 pub mod bindings {
-    wit_bindgen::generate!({
-        world: "plugin",
-        inline: include_str!(concat!(env!("OUT_DIR"), "/vtx.wit")),
-        pub_export_macro: true,
-        default_bindings_module: "vtx_sdk::bindings",
-    });
+    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 }
 
 // =====================
