@@ -22,3 +22,5 @@ pub use crate::{export, Manifest, UserContext};
 /// 插件入口 Trait
 /// 开发者需为结构体实现此 Trait 以作为插件实例
 pub use crate::bindings::Guest as PluginTrait;
+
+pub use crate::ffmpeg::FfmpegTask;
