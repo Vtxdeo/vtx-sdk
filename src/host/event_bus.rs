@@ -1,3 +1,5 @@
+//! Host-side event bus helpers.
+
 use crate::bindings::vtx::api::event_bus;
 use crate::error::{VtxError, VtxResult};
 
@@ -19,4 +21,3 @@ pub fn publish_json<T: serde::Serialize>(topic: &str, payload: &T) -> VtxResult<
         serde_json::to_string(payload).map_err(|e| VtxError::SerializationError(e.to_string()))?;
     publish_raw(topic, &payload_json)
 }
-

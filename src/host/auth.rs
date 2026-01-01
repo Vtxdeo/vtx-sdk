@@ -1,3 +1,5 @@
+//! Host-side auth helpers.
+
 use crate::bindings::vtx::api::auth_types::UserContext;
 use crate::error::{VtxError, VtxResult};
 

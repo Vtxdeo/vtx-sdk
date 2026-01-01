@@ -1,3 +1,5 @@
+//! Host-side SQL helpers.
+
 use crate::bindings::vtx::api::sql::{self, DbValue};
 use crate::error::{VtxError, VtxResult};
 use serde::de::DeserializeOwned;

@@ -1,3 +1,5 @@
+//! Host-side event types and helpers.
+
 use crate::bindings::vtx::api::events::{EventContext, VtxEvent};
 use crate::error::{VtxError, VtxResult};
 use serde::de::DeserializeOwned;
@@ -16,4 +18,3 @@ impl VtxEventExt for VtxEvent {
             .map_err(|e| VtxError::SerializationError(e.to_string()))
     }
 }
-

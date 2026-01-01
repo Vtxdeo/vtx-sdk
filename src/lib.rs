@@ -11,35 +11,17 @@ pub mod bindings {
 // 模块定义
 // =====================
 
-/// 数据库工具模块（迁移、结构、连接封装）
-pub mod db;
+/// 宿主 ABI 封装（按领域拆分，便于维护）
+pub mod host;
 
-/// HTTP 请求 / 响应结构与构造器
-pub mod http;
-
-/// 用户身份认证与上下文结构工具
-pub mod auth;
+/// 兼容性导出：保持 `vtx_sdk::db/...` 等路径不变
+pub use host::{auth, context, db, event_bus, events, ffmpeg, http, stream};
 
 /// 错误类型定义与统一错误处理
 pub mod error;
 
 /// 通用预导入模块（导出常用类型/宏/辅助函数）
 pub mod prelude;
-
-/// FFmpeg 任务封装模块
-pub mod ffmpeg;
-
-/// Stream I/O（Buffer 资源、文件打开、内存缓冲）封装模块
-pub mod stream;
-
-/// 宿主上下文（当前用户）封装模块
-pub mod context;
-
-/// 事件类型与 payload 解析辅助
-pub mod events;
-
-/// 事件总线封装（发布事件）
-pub mod event_bus;
 
 /// 更低样板的插件导出适配
 pub mod plugin;

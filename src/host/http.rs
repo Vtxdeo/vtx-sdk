@@ -1,3 +1,5 @@
+//! Host-side HTTP request/response helpers.
+
 use crate::bindings::vtx::api::{
     stream_io,
     types::{HttpRequest, HttpResponse},

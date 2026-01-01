@@ -1,3 +1,5 @@
+//! Low-boilerplate plugin exports.
+
 use crate::error::{VtxError, VtxResult};
 use crate::events::PluginEvent;
 use crate::http::{Request, Response, ResponseBuilder};

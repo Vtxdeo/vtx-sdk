@@ -41,7 +41,7 @@ Add `vtx-sdk` to your plugin’s `Cargo.toml`:
 
 ```toml
 [dependencies]
-vtx-sdk = "0.1.4"
+vtx-sdk = "0.1.8"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 anyhow = "1.0"

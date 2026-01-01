@@ -1,3 +1,5 @@
+//! Host-side stream I/O helpers (Buffer).
+
 use crate::bindings::vtx::api::stream_io;
 use crate::bindings::vtx::api::stream_io::Buffer;
 use crate::error::{VtxError, VtxResult};

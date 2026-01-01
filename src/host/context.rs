@@ -1,3 +1,5 @@
+//! Host-side context helpers.
+
 use crate::bindings::vtx::api::{auth_types::CurrentUser, context};
 
 pub type CurrentUserInfo = CurrentUser;
@@ -16,4 +18,3 @@ impl CurrentUserExt for CurrentUser {
         self.groups.iter().any(|g| g == group)
     }
 }
-

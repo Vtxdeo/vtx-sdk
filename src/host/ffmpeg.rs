@@ -1,3 +1,5 @@
+//! Host-side FFmpeg helpers.
+
 use crate::bindings::vtx::api::ffmpeg::{self, TranscodeParams};
 use crate::bindings::vtx::api::stream_io::Buffer;
 use crate::bindings::vtx::api::types::HttpResponse;
