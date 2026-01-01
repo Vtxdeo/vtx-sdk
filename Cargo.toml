@@ -1,6 +1,6 @@
 [package]
 name = "vtx-sdk"
-version = "0.1.4"
+version = "0.1.7"
 edition = "2021"
 description = "Official SDK for developing VTX plugins using Rust and WebAssembly."
 license = "Apache-2.0"
