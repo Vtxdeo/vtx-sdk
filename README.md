@@ -9,13 +9,10 @@
 
 ## ✨ Features
 
-* **Type-Safe APIs**: Full Rust type support for database queries, HTTP handling, and file I/O.
-* **Zero Boilerplate**: Use the `vtx_sdk::export!` macro to generate all necessary Wasm component exports.
-* **Database Integration**: Built-in SQLite helpers with automatic JSON serialization/deserialization.
-* **Helper Utilities**:
-    * `ResponseBuilder` for fluent HTTP responses.
-    * `UserBuilder` for easy auth context management.
-    * `VtxError` for unified error handling.
+* **Type-Safe APIs**: Rust 封装覆盖全部 WIT import 接口（SQL / Stream I/O / FFmpeg / Context / Event Bus）。
+* **Low Boilerplate**: `export_plugin!` + `VtxPlugin` 提供默认实现（migrations/resources/handle_event/authenticate）。
+* **Database Integration**: SQLite helpers + JSON 自动反序列化。
+* **Helper Utilities**: `ResponseBuilder` / `UserBuilder` / `BufferExt` / `VtxEventExt` / `VtxError`。
 
 ## 🏗️ Architecture
 
@@ -30,7 +27,7 @@ Add `vtx-sdk` to your plugin's `Cargo.toml`:
 
 ```toml
 [dependencies]
-vtx-sdk = "0.1.1"
+vtx-sdk = "0.1.4"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 anyhow = "1.0"
@@ -46,47 +43,30 @@ Here is a minimal example of a VTX plugin:
 ```rust
 use vtx_sdk::prelude::*;
 
-// 1. Define your plugin structure
 struct MyPlugin;
 
-// 2. Export the component world
-vtx_sdk::export!(MyPlugin);
-
-// 3. Implement the Plugin trait
-impl Plugin for MyPlugin {
-    fn handle(req: HttpRequest) -> Result<HttpResponse, VtxError> {
-        // Log to the host console
+impl VtxPlugin for MyPlugin {
+    fn handle(req: Request) -> VtxResult<Response> {
         println!("Received request: {} {}", req.method, req.path);
-
-        // Return a JSON response
-        ResponseBuilder::ok()
-            .json(&serde_json::json!({
-                "message": "Hello from VTX Plugin!",
-                "path": req.path
-            }))
-            .build()
+        Ok(ResponseBuilder::json(&serde_json::json!({
+            "message": "Hello from VTX Plugin!",
+            "path": req.path,
+            "query": req.query
+        })))
     }
 
-    fn get_manifest() -> Result<Manifest, VtxError> {
-        Ok(Manifest {
+    fn get_manifest() -> Manifest {
+        Manifest {
             id: "com.example.hello".to_string(),
-            version: "0.1.0".to_string(),
             name: "Hello World Plugin".to_string(),
+            version: env!("CARGO_PKG_VERSION").to_string(),
             description: "A simple example plugin".to_string(),
             entrypoint: "/hello".to_string(),
-        })
-    }
-
-    // Optional: Declare database tables
-    fn get_resources() -> Result<Vec<String>, VtxError> {
-        Ok(vec![])
-    }
-
-    // Optional: SQL migrations
-    fn get_migrations() -> Result<Vec<String>, VtxError> {
-        Ok(vec![])
+        }
     }
 }
+
+export_plugin!(MyPlugin);
 ```
 
 ## 🛠️ Build & Deploy
@@ -127,7 +107,17 @@ cargo build --release --target wasm32-wasip1
 
 * **`auth`**: Utilities for parsing headers and constructing `UserContext`.
 
-* **`error`**: The `VtxError` enum maps internal errors to appropriate HTTP status codes (e.g., `VtxError::Unauthorized` -> 401).
+* **`stream`**: File open + `Buffer` read/write helpers (`BufferExt`).
+
+* **`context`**: Current user helpers (`current_user()`).
+
+* **`events`**: Event payload parsing helpers (`VtxEventExt`).
+
+* **`event_bus`**: Publish events to the host (`publish_json`).
+
+* **`plugin`**: `VtxPlugin` + `export_plugin!` (low boilerplate exports).
+
+* **`error`**: Unified error model (`VtxError::AuthDenied(401)`, `VtxError::PermissionDenied(...)`, ...).
 
 ## 📄 License
 

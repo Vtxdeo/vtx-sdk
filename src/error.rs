@@ -26,6 +26,24 @@ pub enum VtxError {
     Internal(String),
 }
 
+impl VtxError {
+    /// 将宿主侧返回的 `string` 错误消息做一个尽量合理的分类映射。
+    pub fn from_host_message(message: impl Into<String>) -> Self {
+        let msg = message.into();
+        let lower = msg.to_lowercase();
+
+        if lower.contains("permission denied") {
+            return VtxError::PermissionDenied(msg);
+        }
+
+        if lower.contains("uuid not found") || lower.contains("not found") {
+            return VtxError::NotFound(msg);
+        }
+
+        VtxError::Internal(msg)
+    }
+}
+
 impl fmt::Display for VtxError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {

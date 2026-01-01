@@ -41,6 +41,45 @@ impl ToDbValue for f64 {
     }
 }
 
+impl ToDbValue for f32 {
+    fn to_db_value(&self) -> DbValue {
+        DbValue::Real(*self as f64)
+    }
+}
+
+impl ToDbValue for u64 {
+    fn to_db_value(&self) -> DbValue {
+        DbValue::Integer(*self as i64)
+    }
+}
+
+impl ToDbValue for u32 {
+    fn to_db_value(&self) -> DbValue {
+        DbValue::Integer(*self as i64)
+    }
+}
+
+impl ToDbValue for bool {
+    fn to_db_value(&self) -> DbValue {
+        DbValue::Integer(if *self { 1 } else { 0 })
+    }
+}
+
+impl ToDbValue for () {
+    fn to_db_value(&self) -> DbValue {
+        DbValue::NullVal
+    }
+}
+
+impl<T: ToDbValue> ToDbValue for Option<T> {
+    fn to_db_value(&self) -> DbValue {
+        match self {
+            Some(v) => v.to_db_value(),
+            None => DbValue::NullVal,
+        }
+    }
+}
+
 /// 执行非查询类 SQL（INSERT / UPDATE / DELETE）
 ///
 /// # Parameters
@@ -55,7 +94,13 @@ impl ToDbValue for f64 {
 pub fn execute(sql: &str, params: &[&dyn ToDbValue]) -> VtxResult<u64> {
     let wit_params: Vec<DbValue> = params.iter().map(|p| p.to_db_value()).collect();
 
-    sql::execute(sql, &wit_params).map_err(VtxError::DatabaseError)
+    sql::execute(sql, &wit_params).map_err(|e| {
+        if e.to_lowercase().contains("permission denied") {
+            VtxError::PermissionDenied(e)
+        } else {
+            VtxError::DatabaseError(e)
+        }
+    })
 }
 
 /// 执行查询类 SQL（SELECT）并反序列化为目标类型列表
@@ -76,7 +121,13 @@ pub fn execute(sql: &str, params: &[&dyn ToDbValue]) -> VtxResult<u64> {
 pub fn query<T: DeserializeOwned>(sql: &str, params: &[&dyn ToDbValue]) -> VtxResult<Vec<T>> {
     let wit_params: Vec<DbValue> = params.iter().map(|p| p.to_db_value()).collect();
 
-    let json_str = sql::query_json(sql, &wit_params).map_err(VtxError::DatabaseError)?;
+    let json_str = sql::query_json(sql, &wit_params).map_err(|e| {
+        if e.to_lowercase().contains("permission denied") {
+            VtxError::PermissionDenied(e)
+        } else {
+            VtxError::DatabaseError(e)
+        }
+    })?;
 
     serde_json::from_str(&json_str).map_err(|e| VtxError::SerializationError(e.to_string()))
 }

@@ -1,6 +1,5 @@
-// vtx-sdk/src/ffmpeg.rs
-
 use crate::bindings::vtx::api::ffmpeg::{self, TranscodeParams};
+use crate::bindings::vtx::api::stream_io::Buffer;
 use crate::bindings::vtx::api::types::HttpResponse;
 use crate::error::{VtxError, VtxResult};
 
@@ -39,6 +38,11 @@ impl FfmpegTask {
             input_id: input_id.into(),
             args: Vec::new(),
         }
+    }
+
+    /// 创建一个使用 stdin 管道作为输入的任务（等价于 `input_id = "pipe:0"`）。
+    pub fn new_pipe(profile: impl Into<String>) -> Self {
+        Self::new(profile, "pipe:0")
     }
 
     /// 添加单个 FFmpeg 参数
@@ -80,34 +84,28 @@ impl FfmpegTask {
         s
     }
 
-    /// 执行任务并返回 HTTP 响应
+    /// 执行任务并返回 Buffer 资源句柄。
     ///
-    /// 该方法会阻塞等待子进程启动，并立即返回包含 stdout 管道流的 HttpResponse。
-    /// 数据将以流式传输给客户端，无需等待转码完成。
-    pub fn execute(self) -> VtxResult<HttpResponse> {
+    /// 这允许你在返回响应前，使用 `buffer.write(...)` 往 `stdin` 写入数据（当 `input_id="pipe:0"` 时）。
+    pub fn execute_buffer(self) -> VtxResult<Buffer> {
         let params = TranscodeParams {
             profile: self.profile,
             input_id: self.input_id,
             args: self.args,
         };
 
-        // 调用宿主接口
-        match ffmpeg::execute(&params) {
-            Ok(buffer_resource) => {
-                // 将宿主返回的 Buffer 资源句柄封装进 Response
-                Ok(HttpResponse {
-                    status: 200,
-                    body: Some(buffer_resource),
-                })
-            }
-            Err(e) => {
-                // 将宿主错误字符串转换为 SDK 标准错误
-                // 通常包含 "Profile not found" 或 "Permission Denied"
-                Err(VtxError::Internal(format!(
-                    "FFmpeg execution failed: {}",
-                    e
-                )))
-            }
-        }
+        ffmpeg::execute(&params).map_err(VtxError::from_host_message)
+    }
+
+    /// 执行任务并返回 HTTP 响应（`200` + body=stdout 管道 Buffer）。
+    ///
+    /// 该方法会阻塞等待子进程启动，并立即返回包含 stdout 管道流的 HttpResponse。
+    /// 数据将以流式传输给客户端，无需等待转码完成。
+    pub fn execute(self) -> VtxResult<HttpResponse> {
+        let buffer = self.execute_buffer()?;
+        Ok(HttpResponse {
+            status: 200,
+            body: Some(buffer),
+        })
     }
 }

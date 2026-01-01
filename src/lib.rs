@@ -29,6 +29,21 @@ pub mod prelude;
 /// FFmpeg 任务封装模块
 pub mod ffmpeg;
 
+/// Stream I/O（Buffer 资源、文件打开、内存缓冲）封装模块
+pub mod stream;
+
+/// 宿主上下文（当前用户）封装模块
+pub mod context;
+
+/// 事件类型与 payload 解析辅助
+pub mod events;
+
+/// 事件总线封装（发布事件）
+pub mod event_bus;
+
+/// 更低样板的插件导出适配
+pub mod plugin;
+
 // =====================
 // 类型导出（供外部模块使用）
 // =====================
@@ -44,6 +59,9 @@ pub use bindings::vtx::api::auth_types::UserContext;
 /// 插件清单类型，用于插件元数据管理
 /// `Manifest` 类型用于表示插件的元数据和描述信息。
 pub use bindings::vtx::api::types::Manifest;
+
+/// 当前用户信息（来自宿主上下文）
+pub use bindings::vtx::api::auth_types::CurrentUser;
 
 // =====================
 // 元数据导出 (仅在 meta 特性开启时可用)

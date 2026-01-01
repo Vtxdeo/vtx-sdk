@@ -24,3 +24,19 @@ pub use crate::{export, Manifest, UserContext};
 pub use crate::bindings::Guest as PluginTrait;
 
 pub use crate::ffmpeg::FfmpegTask;
+
+/// Stream I/O 工具
+pub use crate::stream::{self, BufferExt, StreamBuffer};
+
+/// 上下文工具（当前用户）
+pub use crate::context::{self, CurrentUserExt, CurrentUserInfo};
+
+/// 事件工具（事件类型与 payload 解析）
+pub use crate::events::{self, PluginEvent, PluginEventContext, VtxEventExt};
+
+/// 事件总线（发布事件）
+pub use crate::event_bus;
+
+/// 低样板插件 Trait + 导出宏
+pub use crate::plugin::VtxPlugin;
+pub use crate::export_plugin;
