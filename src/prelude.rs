@@ -37,6 +37,6 @@ pub use crate::events::{self, PluginEvent, PluginEventContext, VtxEventExt};
 /// 事件总线（发布事件）
 pub use crate::event_bus;
 
+pub use crate::export_plugin;
 /// 低样板插件 Trait + 导出宏
 pub use crate::plugin::VtxPlugin;
-pub use crate::export_plugin;

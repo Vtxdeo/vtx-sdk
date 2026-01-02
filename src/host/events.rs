@@ -14,7 +14,6 @@ pub trait VtxEventExt {
 
 impl VtxEventExt for VtxEvent {
     fn payload_json<T: DeserializeOwned>(&self) -> VtxResult<T> {
-        serde_json::from_str(&self.payload)
-            .map_err(|e| VtxError::SerializationError(e.to_string()))
+        serde_json::from_str(&self.payload).map_err(|e| VtxError::SerializationError(e.to_string()))
     }
 }
