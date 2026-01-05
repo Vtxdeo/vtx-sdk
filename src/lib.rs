@@ -15,7 +15,7 @@ pub mod bindings {
 pub mod host;
 
 /// 兼容性导出：保持 `vtx_sdk::db/...` 等路径不变
-pub use host::{auth, context, db, event_bus, events, ffmpeg, http, stream};
+pub use host::{auth, context, db, event_bus, events, ffmpeg, http, http_client, stream};
 
 /// 错误类型定义与统一错误处理
 pub mod error;
@@ -41,6 +41,7 @@ pub use bindings::vtx::api::auth_types::UserContext;
 /// 插件清单类型，用于插件元数据管理
 /// `Manifest` 类型用于表示插件的元数据和描述信息。
 pub use bindings::vtx::api::types::Manifest;
+pub use bindings::vtx::api::types::{Capabilities, HttpAllowRule};
 
 /// 当前用户信息（来自宿主上下文）
 pub use bindings::vtx::api::auth_types::CurrentUser;

@@ -9,6 +9,9 @@ pub use crate::db::{self, ToDbValue};
 /// HTTP 交互工具
 /// 包含请求/响应定义及响应构建器
 pub use crate::http::{Request, Response, ResponseBuilder};
+pub use crate::http_client::{
+    request as http_request, Request as HttpClientRequest, Response as HttpClientResponse,
+};
 
 /// 鉴权与用户上下文工具及转换特征
 pub use crate::auth::{AuthRequest, IntoAuthResult, UserBuilder};
@@ -17,7 +20,7 @@ pub use crate::auth::{AuthRequest, IntoAuthResult, UserBuilder};
 pub use crate::error::{VtxError, VtxResult};
 
 /// 核心元数据与宏
-pub use crate::{export, Manifest, UserContext};
+pub use crate::{export, Capabilities, HttpAllowRule, Manifest, UserContext};
 
 /// 插件入口 Trait
 /// 开发者需为结构体实现此 Trait 以作为插件实例

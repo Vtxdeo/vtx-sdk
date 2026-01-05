@@ -5,4 +5,5 @@ pub mod event_bus;
 pub mod events;
 pub mod ffmpeg;
 pub mod http;
+pub mod http_client;
 pub mod stream;
