@@ -3,7 +3,7 @@
 use crate::error::{VtxError, VtxResult};
 use crate::events::PluginEvent;
 use crate::http::{Request, Response, ResponseBuilder};
-use crate::{Manifest, UserContext};
+use crate::{Capabilities, Manifest, UserContext};
 
 /// 更低样板的插件入口 Trait。
 ///
@@ -27,6 +27,8 @@ pub trait VtxPlugin {
     fn get_resources() -> Vec<String> {
         Vec::new()
     }
+
+    fn get_capabilities() -> Capabilities;
 
     /// 默认返回 401，表示该插件不处理鉴权（不会阻断责任链中的其它插件）。
     fn authenticate(_headers: &[(String, String)]) -> VtxResult<UserContext> {
@@ -71,6 +73,10 @@ macro_rules! export_plugin {
 
             fn get_resources() -> Vec<String> {
                 <$plugin as $crate::plugin::VtxPlugin>::get_resources()
+            }
+
+            fn get_capabilities() -> $crate::Capabilities {
+                <$plugin as $crate::plugin::VtxPlugin>::get_capabilities()
             }
 
             fn authenticate(

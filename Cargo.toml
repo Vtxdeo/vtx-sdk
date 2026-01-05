@@ -26,14 +26,14 @@ wit-bindgen = "0.25.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 # 生产环境策略:
-vtx-protocol = "3.2.1"
+vtx-protocol = "3.5.0"
 
 # 开发环境策略:
 #vtx-protocol = { git = "https://github.com/vtxdeo/vtx-protocol.git", branch = "master" }
 
 [build-dependencies]
 # 生产环境策略:
-vtx-protocol = "3.2.1"
+vtx-protocol = "3.5.0"
 
 # 开发环境策略:
 #vtx-protocol = { git = "https://github.com/vtxdeo/vtx-protocol.git", branch = "master" }
