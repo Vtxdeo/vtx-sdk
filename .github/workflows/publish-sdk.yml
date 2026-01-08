@@ -19,6 +19,15 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Sync version from Git Tag
+        run: |
+          TAG_NAME=${GITHUB_REF_NAME}
+          VERSION=${TAG_NAME#v}
+          echo "Detected release version: $VERSION"
+
+          sed -i "s/^version = .*/version = \"$VERSION\"/" Cargo.toml
+          grep "^version =" Cargo.toml
+
       - name: Check Build
         run: cargo check --verbose
 
