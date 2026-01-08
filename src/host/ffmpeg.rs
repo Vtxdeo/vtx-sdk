@@ -1,14 +1,11 @@
 //! Host-side FFmpeg helpers.
 
-use crate::bindings::vtx::api::ffmpeg::{self, TranscodeParams};
+use crate::bindings::vtx::api::ffmpeg::{self, FfmpegOption, TranscodeProfile};
 use crate::bindings::vtx::api::stream_io::Buffer;
 use crate::bindings::vtx::api::types::HttpResponse;
 use crate::error::{VtxError, VtxResult};
 
-/// FFmpeg 任务构建器
-///
-/// 用于构建并执行服务端的 FFmpeg 转码任务。
-/// 采用 Builder 模式，支持链式调用。
+/// FFmpeg task builder for running host-side transcoding.
 ///
 /// # Example
 ///
@@ -17,92 +14,95 @@ use crate::error::{VtxError, VtxResult};
 ///
 /// fn handle_video(vid: String) -> VtxResult<Response> {
 ///     FfmpegTask::new("mini", vid)
-///         .arg("-ss 10")
-///         .arg("-t 30")
+///         .option("ss", "10")
+///         .option("t", "30")
 ///         .execute()
 /// }
 /// ```
 pub struct FfmpegTask {
     profile: String,
     input_id: String,
-    args: Vec<String>,
+    options: Vec<FfmpegOption>,
 }
 
 impl FfmpegTask {
-    /// 创建一个新的 FFmpeg 任务
+    /// Create a new FFmpeg task.
     ///
-    /// # Parameters
-    /// - `profile`: 目标 Profile 名称 (如 "mini", "remux", "thumbnail")
-    /// - `input_id`: 输入视频的唯一资源 ID (UUID)
+    /// - `profile`: target FFmpeg profile (e.g. "mini", "remux", "thumbnail")
+    /// - `input_id`: input resource ID (UUID) or "pipe:0"
     pub fn new(profile: impl Into<String>, input_id: impl Into<String>) -> Self {
         Self {
             profile: profile.into(),
             input_id: input_id.into(),
-            args: Vec::new(),
+            options: Vec::new(),
         }
     }
 
-    /// 创建一个使用 stdin 管道作为输入的任务（等价于 `input_id = "pipe:0"`）。
+    /// Create a task that uses stdin as input (`input_id = "pipe:0"`).
     pub fn new_pipe(profile: impl Into<String>) -> Self {
         Self::new(profile, "pipe:0")
     }
 
-    /// 添加单个 FFmpeg 参数
-    ///
-    /// 自动处理参数转义，防止注入风险。
-    ///
-    /// # Example
-    /// `.arg("-ss").arg("10")`
-    pub fn arg(mut self, arg: impl Into<String>) -> Self {
-        self.args.push(arg.into());
+    /// Add a key/value FFmpeg option (encoded as `-key=value`).
+    pub fn option(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
+        self.options.push(FfmpegOption {
+            key: key.into(),
+            value: Some(value.into()),
+        });
         self
     }
 
-    /// 批量添加参数
-    pub fn args<I, S>(mut self, args: I) -> Self
+    /// Add a flag-style FFmpeg option (encoded as `-key`).
+    pub fn flag(mut self, key: impl Into<String>) -> Self {
+        self.options.push(FfmpegOption {
+            key: key.into(),
+            value: None,
+        });
+        self
+    }
+
+    /// Add a batch of key/value options.
+    pub fn options<I, K, V>(mut self, options: I) -> Self
     where
-        I: IntoIterator<Item = S>,
-        S: Into<String>,
+        I: IntoIterator<Item = (K, V)>,
+        K: Into<String>,
+        V: Into<String>,
     {
-        for arg in args {
-            self.args.push(arg.into());
+        for (key, value) in options {
+            self.options.push(FfmpegOption {
+                key: key.into(),
+                value: Some(value.into()),
+            });
         }
         self
     }
 
-    /// 快捷方法：设置输出格式
-    /// 等同于 `.arg("-f").arg(format)`
+    /// Helper: set output format (equivalent to `-f=format`).
     pub fn format(self, format: &str) -> Self {
-        self.arg("-f").arg(format)
+        self.option("f", format)
     }
 
-    /// 快捷方法：设置时间裁剪
-    /// 等同于 `.arg("-ss").arg(start).arg("-t").arg(duration)`
+    /// Helper: set seek window (equivalent to `-ss` + optional `-t`).
     pub fn seek(self, start: &str, duration: Option<&str>) -> Self {
-        let mut s = self.arg("-ss").arg(start);
+        let mut s = self.option("ss", start);
         if let Some(d) = duration {
-            s = s.arg("-t").arg(d);
+            s = s.option("t", d);
         }
         s
     }
 
-    /// 执行任务并返回 Buffer 资源句柄。
-    ///
-    /// 这允许你在返回响应前，使用 `buffer.write(...)` 往 `stdin` 写入数据（当 `input_id="pipe:0"` 时）。
+    /// Execute and return the stdout pipe buffer.
     pub fn execute_buffer(self) -> VtxResult<Buffer> {
-        let params = TranscodeParams {
+        let params = TranscodeProfile {
             profile: self.profile,
             input_id: self.input_id,
-            args: self.args,
+            options: self.options,
         };
 
         ffmpeg::execute(&params).map_err(VtxError::from_host_message)
     }
 
-    /// 执行任务并返回 HTTP 响应（`200` + body=stdout 管道 Buffer）。
-    ///
-    /// 该方法会阻塞等待子进程启动，并立即返回包含 stdout 管道流的 HttpResponse。
-    /// 数据将以流式传输给客户端，无需等待转码完成。
+    /// Execute and return an HTTP response (`200` with stdout pipe body).
     pub fn execute(self) -> VtxResult<HttpResponse> {
         let buffer = self.execute_buffer()?;
         Ok(HttpResponse {
